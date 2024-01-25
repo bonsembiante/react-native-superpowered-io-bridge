@@ -1,23 +1,21 @@
 
 # react-native-superpowered-io-bridge
 
+This library its a simple implementation of the Superpowered SDK in react-native **(only for Andriod for now)**. The only thing that this module does is to bridge the input to the output (be careful with the feedback). It uses the SuperpoweredStereoMixer for control panning. That control ocurrs at react native, enabling and disabling left or right channel. Use a headset for testing it.
+
+If you want to add any effect, the magic succed at AudioIOBridge.cpp::audioProcessing
+
+Refer to the [Superpowered SDK repository](https://github.com/superpoweredSDK/Low-Latency-Android-iOS-Linux-Windows-tvOS-macOS-Interactive-Audio-Platform/) for more examples and library docs
+
 ## Getting started
 
-`$ npm install react-native-superpowered-io-bridge --save`
+`$ npm install furiedev/react-native-superpowered-io-bridge --save`
 
 ### Mostly automatic installation
 
 `$ react-native link react-native-superpowered-io-bridge`
 
 ### Manual installation
-
-
-#### iOS
-
-1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-2. Go to `node_modules` ➜ `react-native-superpowered-io-bridge` and add `RNSuperpoweredIoBridge.xcodeproj`
-3. In XCode, in the project navigator, select your project. Add `libRNSuperpoweredIoBridge.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
-4. Run your project (`Cmd+R`)<
 
 #### Android
 
@@ -34,20 +32,120 @@
       compile project(':react-native-superpowered-io-bridge')
   	```
 
-#### Windows
-[Read it! :D](https://github.com/ReactWindows/react-native)
-
-1. In Visual Studio add the `RNSuperpoweredIoBridge.sln` in `node_modules/react-native-superpowered-io-bridge/windows/RNSuperpoweredIoBridge.sln` folder to their solution, reference from their app.
-2. Open up your `MainPage.cs` app
-  - Add `using Superpowered.Io.Bridge.RNSuperpoweredIoBridge;` to the usings at the top of the file
-  - Add `new RNSuperpoweredIoBridgePackage()` to the `List<IReactPackage>` returned by the `Packages` method
-
-
 ## Usage
 ```javascript
-import RNSuperpoweredIoBridge from 'react-native-superpowered-io-bridge';
 
-// TODO: What to do with the module?
-RNSuperpoweredIoBridge;
+import React, { Component } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableHighlight,
+  NativeModules
+} from "react-native";
+
+type Props = {};
+export default class App extends Component<Props> {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      playing: false,
+      panning: {
+        left: 1.0,
+        right: 1.0
+      },
+      returned: ""
+    };
+  }
+
+  componentDidMount() {
+    NativeModules.RNSuperpoweredIoBridge.initialize()
+      .then(() => {
+        return NativeModules.RNSuperpoweredIoBridge.ToggleStartStop();
+      })
+      .then(playing => {
+        this.setState({ playing });
+      });
+  }
+
+  toggleLeft() {
+    var { left, right } = this.state.panning;
+    if (left === 1.0) {
+      left = 0.0;
+    } else {
+      left = 1.0;
+    }
+    this.updatePanning(left, right);
+    this.setState({
+      panning: { left, right }
+    });
+  }
+
+  toggleRight() {
+    var { left, right } = this.state.panning;
+    if (right === 1.0) {
+      right = 0.0;
+    } else {
+      right = 1.0;
+    }
+    this.updatePanning(left, right);
+    this.setState({
+      panning: { left, right }
+    });
+  }
+
+  updatePanning(left, right) {
+    NativeModules.RNSuperpoweredIoBridge.updatePanning(left, right);
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <TouchableHighlight
+          style={styles.button}
+          onPress={() => {
+            this.toggleLeft();
+          }}
+        >
+          <Text style={{ color: "#fff" }}>Left</Text>
+        </TouchableHighlight>
+        <Text style={styles.label}>
+          Left: {this.state.panning.left ? "ON" : "OFF"}
+        </Text>
+        <TouchableHighlight
+          style={styles.button}
+          onPress={() => {
+            this.toggleRight();
+          }}
+        >
+          <Text style={{ color: "#fff" }}>Right</Text>
+        </TouchableHighlight>
+        <Text style={styles.label}>
+          Right: {this.state.panning.right ? "ON" : "OFF"}
+        </Text>
+      </View>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5FCFF"
+  },
+  label: {
+    fontSize: 20,
+    textAlign: "center",
+    margin: 10
+  },
+  button: {
+    backgroundColor: "#22d",
+    padding: 10
+  }
+});
+
 ```
   
