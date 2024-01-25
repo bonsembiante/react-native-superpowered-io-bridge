@@ -1,5 +1,5 @@
 
-package com.reactlibrary;
+package com.reactlibrary.superpowerediobridge;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
