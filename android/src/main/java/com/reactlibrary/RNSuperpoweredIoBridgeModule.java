@@ -1,6 +1,7 @@
 
 package com.reactlibrary;
 
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -18,5 +19,10 @@ public class RNSuperpoweredIoBridgeModule extends ReactContextBaseJavaModule {
   @Override
   public String getName() {
     return "RNSuperpoweredIoBridge";
+  }
+
+  @ReactMethod
+  public void helloWorld(Promise promise) {
+      promise.resolve("Delio Valdez");
   }
 }
